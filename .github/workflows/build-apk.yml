@@ -1,42 +1,36 @@
-
-name: Build Leia Pra Mim APK
-
+name: Build APK
 on:
   workflow_dispatch:
-
-permissions:
-  contents: read
-
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      APP_URL: https://SEU-APP.lovable.app
     steps:
-      - name: Baixar projeto
-        uses: actions/checkout@v4
-
-      - name: Instalar Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 22
-          package-manager-cache: false
-
-      - name: Configurar Capacitor para Android
-        run: npx --yes capstart init . --framework tanstack-start --vite-config vite.config.ts --app-id com.wendel.leiapramim --app-name "Leia Pra Mim" --platforms android --setup minimal --no-safe-area --yes
-      - name: Gerar projeto Android
-        run: npm run cap:sync
-
-      - name: Configurar Java
-        uses: actions/setup-java@v4
+          node-version: 20
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
-
       - name: Gerar APK
-        working-directory: android
-        run: chmod +x gradlew && ./gradlew assembleDebug
-
-      - name: Disponibilizar APK
-        uses: actions/upload-artifact@v4
+        run: |
+          mkdir app && cd app
+          npm init -y
+          npm i @capacitor/core @capacitor/android
+          npm i -D @capacitor/cli
+          mkdir www && echo '<html></html>' > www/index.html
+          cat > capacitor.config.json <<EOF
+          {"appId":"com.seunome.meuapp","appName":"MeuApp","webDir":"www","server":{"url":"$APP_URL"}}
+          EOF
+          npx cap add android
+          npx cap sync android
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
         with:
-          name: Leia-Pra-Mim-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: app-debug
+          path: app/android/app/build/outputs/apk/debug/app-debug.apk
