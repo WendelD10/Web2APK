@@ -21,8 +21,7 @@ jobs:
           package-manager-cache: false
 
       - name: Configurar Capacitor para Android
-        run: npx --yes capstart init . --framework tanstack-start --app-id com.wendel.leiapramim --app-name "Leia Pra Mim" --platforms android --setup minimal --no-safe-area --yes
-
+        run: npx --yes capstart init . --framework tanstack-start --vite-config vite.config.ts --app-id com.wendel.leiapramim --app-name "Leia Pra Mim" --platforms android --setup minimal --no-safe-area --yes
       - name: Gerar projeto Android
         run: npm run cap:sync
 
